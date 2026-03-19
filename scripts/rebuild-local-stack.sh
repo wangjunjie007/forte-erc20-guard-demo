@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+UPSTREAM_DIR="$ROOT_DIR/tmp/forte-rules-engine-upstream"
+LOG_DIR="$ROOT_DIR/logs"
+CACHE_DIR="$ROOT_DIR/cache"
+ANVIL_LOG="$LOG_DIR/anvil.log"
+ANVIL_PID_FILE="$CACHE_DIR/anvil.pid"
+RPC_URL="http://127.0.0.1:8545"
+OWNER="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+OWNER_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+mkdir -p "$LOG_DIR" "$CACHE_DIR"
+
+if [[ -f "$HOME/.zshenv" ]]; then
+  # Optional: pick up user-installed toolchains (brew, foundry, nvm, etc.) when available.
+  # The script still works without this file as long as forge/cast/anvil/npm are already on PATH.
+  source "$HOME/.zshenv"
+fi
+
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || { echo "Missing command: $1" >&2; exit 1; }
+}
+
+require_cmd forge
+require_cmd cast
+require_cmd anvil
+require_cmd npx
+require_cmd jq
+
+cd "$ROOT_DIR"
+
+start_fresh_anvil() {
+  if [[ -f "$ANVIL_PID_FILE" ]]; then
+    OLD_PID="$(cat "$ANVIL_PID_FILE" 2>/dev/null || true)"
+    if [[ -n "$OLD_PID" ]] && kill -0 "$OLD_PID" 2>/dev/null; then
+      kill "$OLD_PID" 2>/dev/null || true
+      sleep 1
+    fi
+    rm -f "$ANVIL_PID_FILE"
+  fi
+
+  nohup anvil --host 127.0.0.1 --port 8545 >"$ANVIL_LOG" 2>&1 &
+  echo $! > "$ANVIL_PID_FILE"
+
+  for _ in $(seq 1 30); do
+    if cast block-number --rpc-url "$RPC_URL" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "anvil failed to start" >&2
+  tail -n 50 "$ANVIL_LOG" >&2 || true
+  exit 1
+}
+
+ensure_upstream_ready() {
+  if [[ ! -d "$UPSTREAM_DIR" ]]; then
+    git clone https://github.com/Forte-Service-Company-Ltd/forte-rules-engine.git "$UPSTREAM_DIR"
+  fi
+
+  cd "$UPSTREAM_DIR"
+  if [[ ! -d node_modules ]]; then
+    npm install
+  fi
+  forge soldeer install >/dev/null
+  cd "$ROOT_DIR"
+}
+
+deploy_rules_engine() {
+  cd "$UPSTREAM_DIR"
+  bash script/deployment/SimpleDeploy.sh >/tmp/forte_rules_engine_deploy.log 2>&1 || {
+    cat /tmp/forte_rules_engine_deploy.log >&2
+    exit 1
+  }
+  DIAMOND_ADDRESS="$(grep '^DIAMOND_ADDRESS=' .env | cut -d '=' -f2 | tr -d '[:space:]')"
+  cd "$ROOT_DIR"
+  if [[ -z "$DIAMOND_ADDRESS" || "$DIAMOND_ADDRESS" == "0x0000000000000000000000000000000000000000" ]]; then
+    echo "Failed to get DIAMOND_ADDRESS" >&2
+    exit 1
+  fi
+}
+
+deploy_demo() {
+  PRIV_KEY="$OWNER_KEY" MAX_TRANSFER_WEI=1000000000000000000000 \
+    forge script script/DeployDemo.s.sol --broadcast --rpc-url "$RPC_URL" --private-key "$OWNER_KEY" -vv >/tmp/forte_demo_deploy.log 2>&1 || {
+      cat /tmp/forte_demo_deploy.log >&2
+      exit 1
+    }
+
+  local run_json="$ROOT_DIR/broadcast/DeployDemo.s.sol/31337/run-latest.json"
+  BLACKLIST_ORACLE_ADDRESS="$(jq -r '.transactions[] | select(.contractName=="BlacklistOracle") | .contractAddress' "$run_json" | tail -n1)"
+  TOKEN_ADDRESS="$(jq -r '.transactions[] | select(.contractName=="ForteGuardedToken") | .contractAddress' "$run_json" | tail -n1)"
+
+  if [[ -z "$BLACKLIST_ORACLE_ADDRESS" || -z "$TOKEN_ADDRESS" || "$TOKEN_ADDRESS" == "null" ]]; then
+    echo "Failed to parse deployed contract addresses" >&2
+    cat /tmp/forte_demo_deploy.log >&2
+    exit 1
+  fi
+}
+
+configure_token() {
+  cast send "$TOKEN_ADDRESS" "setRulesEngineAddress(address)" "$DIAMOND_ADDRESS" --rpc-url "$RPC_URL" --private-key "$OWNER_KEY" >/dev/null
+  cast send "$TOKEN_ADDRESS" "setCallingContractAdmin(address)" "$OWNER" --rpc-url "$RPC_URL" --private-key "$OWNER_KEY" >/dev/null
+}
+
+create_and_apply_policy() {
+  TOKEN_ADDRESS="$TOKEN_ADDRESS" \
+  RULES_ENGINE_ADDRESS="$DIAMOND_ADDRESS" \
+  RPC_URL="$RPC_URL" \
+  PRIV_KEY="$OWNER_KEY" \
+  SKIP_APPLY=1 \
+    npx tsx scripts/apply-policy.ts >/tmp/forte_apply_policy.log 2>&1 || {
+      cat /tmp/forte_apply_policy.log >&2
+      exit 1
+    }
+
+  POLICY_ID="$(jq -r '.policyId' "$ROOT_DIR/cache/apply-policy-result.json")"
+  if [[ -z "$POLICY_ID" || "$POLICY_ID" == "null" ]]; then
+    echo "Failed to parse policy id" >&2
+    cat /tmp/forte_apply_policy.log >&2
+    exit 1
+  fi
+
+  cast send "$DIAMOND_ADDRESS" "applyPolicy(address,uint256[])" "$TOKEN_ADDRESS" "[$POLICY_ID]" --rpc-url "$RPC_URL" --private-key "$OWNER_KEY" >/dev/null
+}
+
+write_env() {
+  cat > "$ROOT_DIR/.env" <<EOF
+RPC_URL=$RPC_URL
+PRIV_KEY=$OWNER_KEY
+RULES_ENGINE_ADDRESS=$DIAMOND_ADDRESS
+BLACKLIST_ORACLE_ADDRESS=$BLACKLIST_ORACLE_ADDRESS
+TOKEN_ADDRESS=$TOKEN_ADDRESS
+TREASURY_ADDRESS=$OWNER
+MAX_TRANSFER_WEI=1000000000000000000000
+POLICY_ID=$POLICY_ID
+EOF
+}
+
+run_validation() {
+  "$ROOT_DIR/scripts/live-check.sh" >/tmp/forte_live_check.log 2>&1 || {
+    cat /tmp/forte_live_check.log >&2
+    exit 1
+  }
+}
+
+write_summary() {
+  cat > "$ROOT_DIR/cache/deployment-summary.json" <<EOF
+{
+  "network": {
+    "name": "anvil",
+    "chainId": 31337,
+    "rpc": "$RPC_URL"
+  },
+  "rulesEngine": {
+    "diamondAddress": "$DIAMOND_ADDRESS"
+  },
+  "demoContracts": {
+    "blacklistOracle": "$BLACKLIST_ORACLE_ADDRESS",
+    "token": "$TOKEN_ADDRESS"
+  },
+  "policy": {
+    "appliedPolicyId": $POLICY_ID,
+    "policyType": "open"
+  },
+  "validation": {
+    "capRule": "pass",
+    "blacklistRule": "pass",
+    "lockupRule": "pass"
+  }
+}
+EOF
+}
+
+start_fresh_anvil
+ensure_upstream_ready
+deploy_rules_engine
+deploy_demo
+configure_token
+create_and_apply_policy
+write_env
+run_validation
+write_summary
+
+echo "DONE"
+echo "DIAMOND_ADDRESS=$DIAMOND_ADDRESS"
+echo "BLACKLIST_ORACLE_ADDRESS=$BLACKLIST_ORACLE_ADDRESS"
+echo "TOKEN_ADDRESS=$TOKEN_ADDRESS"
+echo "POLICY_ID=$POLICY_ID"
