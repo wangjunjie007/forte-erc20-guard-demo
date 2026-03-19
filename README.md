@@ -139,7 +139,7 @@ forte-erc20-guard-demo/
 
 ```bash
 npm install
-forge install foundry-rs/forge-std --no-commit
+forge install foundry-rs/forge-std --no-git
 ```
 
 ### 2. Rebuild the full local stack

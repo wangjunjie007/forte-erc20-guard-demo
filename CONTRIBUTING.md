@@ -6,7 +6,7 @@ Thanks for your interest in improving this demo.
 
 ```bash
 npm install
-forge install foundry-rs/forge-std --no-commit
+forge install foundry-rs/forge-std --no-git
 ```
 
 ## Validation before opening a PR

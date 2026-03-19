@@ -8,7 +8,7 @@ This document gives you the fastest path to showing the repository in a public s
 
 ```bash
 npm install
-forge install foundry-rs/forge-std --no-commit
+forge install foundry-rs/forge-std --no-git
 ```
 
 ### 2. Rebuild the full local stack

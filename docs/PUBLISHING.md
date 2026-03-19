@@ -16,7 +16,7 @@ This repository is prepared for public release, but publishing is still a delibe
 
 ```bash
 npm install
-forge install foundry-rs/forge-std --no-commit
+forge install foundry-rs/forge-std --no-git
 npm test
 npm run check:integration
 npm run check:policy
