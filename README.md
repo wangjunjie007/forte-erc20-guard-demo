@@ -1,6 +1,7 @@
 # Forte ERC20 Guard Demo
 
 [![CI](https://github.com/wangjunjie007/forte-erc20-guard-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/wangjunjie007/forte-erc20-guard-demo/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/wangjunjie007/forte-erc20-guard-demo)](https://github.com/wangjunjie007/forte-erc20-guard-demo/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Foundry](https://img.shields.io/badge/Built%20with-Foundry-3C3C3D)](https://book.getfoundry.sh/)
 
