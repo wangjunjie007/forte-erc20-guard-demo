@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "description": "A practical ERC20 demo showing how to enforce transfer caps, blacklist checks, and lockups with Forte Rules Engine",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangjunjie007/forte-erc20-guard-demo.git"
+  },
+  "homepage": "https://github.com/wangjunjie007/forte-erc20-guard-demo#readme",
+  "bugs": {
+    "url": "https://github.com/wangjunjie007/forte-erc20-guard-demo/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "forge test -vv",
     "rebuild:local": "bash scripts/rebuild-local-stack.sh",

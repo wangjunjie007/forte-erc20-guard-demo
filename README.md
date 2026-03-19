@@ -1,5 +1,9 @@
 # Forte ERC20 Guard Demo
 
+[![CI](https://github.com/wangjunjie007/forte-erc20-guard-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/wangjunjie007/forte-erc20-guard-demo/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Foundry](https://img.shields.io/badge/Built%20with-Foundry-3C3C3D)](https://book.getfoundry.sh/)
+
 A practical Solidity demo that shows how to enforce **transfer caps**, **blacklist checks**, and **lockups** on an ERC20 token with **Forte Rules Engine** instead of hardcoding all compliance logic directly into the token.
 
 > Status: **public-release ready for local demo use**  
@@ -85,9 +89,11 @@ flowchart LR
 ```text
 forte-erc20-guard-demo/
 ├─ .env.sample
+├─ CONTRIBUTING.md
 ├─ LICENSE
-├─ README.md
 ├─ NEXT_STEPS.md
+├─ README.md
+├─ SECURITY.md
 ├─ foundry.toml
 ├─ package.json
 ├─ policy/
@@ -110,6 +116,7 @@ forte-erc20-guard-demo/
 │  └─ MockRulesEngine.sol
 ├─ docs/
 │  ├─ ARCHITECTURE.md
+│  ├─ DEMO.md
 │  └─ PUBLISHING.md
 └─ examples/
    └─ deployment-summary.example.json
@@ -265,12 +272,21 @@ This repository is prepared for a public code release in the following sense:
 - public docs are now in English
 - package scripts provide a clean demo surface for reviewers
 
-If you want to publish the repo itself, see:
+If you want to publish or demo the repo itself, see:
 
 - `NEXT_STEPS.md`
+- `docs/DEMO.md`
 - `docs/PUBLISHING.md`
 
 ---
+
+## Contributing
+
+See `CONTRIBUTING.md`.
+
+## Security
+
+See `SECURITY.md`.
 
 ## License
 
