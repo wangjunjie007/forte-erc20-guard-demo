@@ -28,15 +28,21 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Install OS deps
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
+      - name: Show tool versions
+        run: |
+          node -v
+          npm -v
+          forge --version
+
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Install forge-std
         run: forge install foundry-rs/forge-std --no-commit
