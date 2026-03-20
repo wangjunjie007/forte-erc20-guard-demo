@@ -110,6 +110,7 @@ forte-erc20-guard-demo/
 │  ├─ live-check.sh
 │  ├─ policy-helper.ts
 │  ├─ rebuild-local-stack.sh
+│  ├─ run-policy-playground.sh
 │  └─ validate-policy-examples.ts
 ├─ src/
 │  ├─ BlacklistOracle.sol
@@ -122,16 +123,21 @@ forte-erc20-guard-demo/
 │  ├─ ARCHITECTURE.md
 │  ├─ DEMO.md
 │  ├─ POLICY_COOKBOOK.md
+│  ├─ POLICY_PLAYGROUND.md
 │  ├─ PUBLISHING.md
 │  └─ TYPESCRIPT_HELPER.md
-└─ examples/
-   ├─ deployment-summary.example.json
-   └─ policies/
-      ├─ README.md
-      ├─ lockup-and-sanctions-only.policy.json
-      ├─ retail-cap-with-treasury-bypass.policy.json
-      ├─ strict-no-exemptions.policy.json
-      └─ treasury-emergency-freeze.policy.json
+├─ examples/
+│  ├─ deployment-summary.example.json
+│  └─ policies/
+│     ├─ README.md
+│     ├─ lockup-and-sanctions-only.policy.json
+│     ├─ retail-cap-with-treasury-bypass.policy.json
+│     ├─ strict-no-exemptions.policy.json
+│     └─ treasury-emergency-freeze.policy.json
+└─ playground/
+   ├─ app.js
+   ├─ index.html
+   └─ styles.css
 ```
 
 ---
@@ -242,6 +248,24 @@ To expand participation beyond Solidity-only contributors, this repo now include
 - `npm run policy:apply-template -- --template <name> --create-only` to create without apply
 
 See full usage and CLI options in `docs/TYPESCRIPT_HELPER.md`.
+
+---
+
+## Local policy playground
+
+For fast posture simulation, run:
+
+```bash
+npm run playground:start
+```
+
+Then open:
+
+- `http://127.0.0.1:4173/playground/`
+
+This playground evaluates policy rules from cookbook JSON in-browser and shows a rule-by-rule PASS/FAIL view with final allow/revert outcome.
+
+See `docs/POLICY_PLAYGROUND.md` for usage details.
 
 ---
 
