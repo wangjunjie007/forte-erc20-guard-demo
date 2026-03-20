@@ -102,12 +102,15 @@ forte-erc20-guard-demo/
 ├─ script/
 │  └─ DeployDemo.s.sol
 ├─ scripts/
+│  ├─ apply-policy-template.ts
 │  ├─ apply-policy.ts
 │  ├─ assert-policy-state.sh
 │  ├─ generate-integration.ts
 │  ├─ integration-check.sh
 │  ├─ live-check.sh
-│  └─ rebuild-local-stack.sh
+│  ├─ policy-helper.ts
+│  ├─ rebuild-local-stack.sh
+│  └─ validate-policy-examples.ts
 ├─ src/
 │  ├─ BlacklistOracle.sol
 │  ├─ ForteGuardedToken.sol
@@ -119,7 +122,8 @@ forte-erc20-guard-demo/
 │  ├─ ARCHITECTURE.md
 │  ├─ DEMO.md
 │  ├─ POLICY_COOKBOOK.md
-│  └─ PUBLISHING.md
+│  ├─ PUBLISHING.md
+│  └─ TYPESCRIPT_HELPER.md
 └─ examples/
    ├─ deployment-summary.example.json
    └─ policies/
@@ -226,6 +230,18 @@ This repo now includes:
 - `npm run check:examples` to validate the cookbook in CI
 
 That makes the repo more useful as a reusable Forte developer on-ramp instead of just a one-off demo.
+
+---
+
+## TypeScript / viem helper wrapper
+
+To expand participation beyond Solidity-only contributors, this repo now includes a TypeScript helper layer:
+
+- `npm run policy:templates` to list available cookbook templates
+- `npm run policy:apply-template -- --template <name>` to create+apply a template
+- `npm run policy:apply-template -- --template <name> --create-only` to create without apply
+
+See full usage and CLI options in `docs/TYPESCRIPT_HELPER.md`.
 
 ---
 
