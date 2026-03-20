@@ -1,6 +1,6 @@
 {
   "name": "forte-erc20-guard-demo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A practical ERC20 demo showing how to enforce transfer caps, blacklist checks, and lockups with Forte Rules Engine",
   "license": "MIT",
   "repository": {
@@ -20,6 +20,7 @@
     "check:live": "bash scripts/live-check.sh",
     "check:integration": "bash scripts/integration-check.sh",
     "check:policy": "bash scripts/assert-policy-state.sh",
+    "check:examples": "tsx scripts/validate-policy-examples.ts",
     "generate:integration": "tsx scripts/generate-integration.ts"
   },
   "keywords": [

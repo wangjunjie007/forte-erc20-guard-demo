@@ -1,0 +1,54 @@
+{
+  "Policy": "Lockup And Sanctions Only",
+  "Description": "Use Forte Rules Engine for vesting-style lockups and blacklist enforcement while leaving transfer sizing unrestricted.",
+  "PolicyType": "open",
+  "CallingFunctions": [
+    {
+      "Name": "transfer",
+      "FunctionSignature": "transfer(address to, uint256 value)",
+      "EncodedValues": "address from, address to, uint256 value, uint256 blockTime, uint256 fromUnlockTime, uint256 fromBlacklistFlag, uint256 toBlacklistFlag, uint256 treasuryBypass, uint256 maxTransfer"
+    },
+    {
+      "Name": "transferFrom",
+      "FunctionSignature": "transferFrom(address from, address to, uint256 value)",
+      "EncodedValues": "address from, address to, uint256 value, uint256 blockTime, uint256 fromUnlockTime, uint256 fromBlacklistFlag, uint256 toBlacklistFlag, uint256 treasuryBypass, uint256 maxTransfer"
+    }
+  ],
+  "ForeignCalls": [],
+  "Trackers": [],
+  "MappedTrackers": [],
+  "Rules": [
+    {
+      "Name": "Transfer Blacklist Check",
+      "Description": "Block transfers that involve blacklisted addresses.",
+      "Condition": "fromBlacklistFlag == 0 AND toBlacklistFlag == 0",
+      "PositiveEffects": ["emit \"BlacklistCheckPassed\""],
+      "NegativeEffects": ["revert(\"Blacklisted address\")"],
+      "CallingFunction": "transfer"
+    },
+    {
+      "Name": "Transfer Lockup Check",
+      "Description": "Prevent transfers before the sender unlock time unless treasury bypass is active.",
+      "Condition": "treasuryBypass == 1 OR blockTime >= fromUnlockTime",
+      "PositiveEffects": ["emit \"LockupCheckPassed\""],
+      "NegativeEffects": ["revert(\"Tokens still locked\")"],
+      "CallingFunction": "transfer"
+    },
+    {
+      "Name": "TransferFrom Blacklist Check",
+      "Description": "Block transferFrom calls that involve blacklisted addresses.",
+      "Condition": "fromBlacklistFlag == 0 AND toBlacklistFlag == 0",
+      "PositiveEffects": ["emit \"BlacklistCheckPassed\""],
+      "NegativeEffects": ["revert(\"Blacklisted address\")"],
+      "CallingFunction": "transferFrom"
+    },
+    {
+      "Name": "TransferFrom Lockup Check",
+      "Description": "Prevent transferFrom before unlock time unless treasury bypass is active.",
+      "Condition": "treasuryBypass == 1 OR blockTime >= fromUnlockTime",
+      "PositiveEffects": ["emit \"LockupCheckPassed\""],
+      "NegativeEffects": ["revert(\"Tokens still locked\")"],
+      "CallingFunction": "transferFrom"
+    }
+  ]
+}

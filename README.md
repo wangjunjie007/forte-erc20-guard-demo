@@ -118,9 +118,16 @@ forte-erc20-guard-demo/
 ├─ docs/
 │  ├─ ARCHITECTURE.md
 │  ├─ DEMO.md
+│  ├─ POLICY_COOKBOOK.md
 │  └─ PUBLISHING.md
 └─ examples/
-   └─ deployment-summary.example.json
+   ├─ deployment-summary.example.json
+   └─ policies/
+      ├─ README.md
+      ├─ lockup-and-sanctions-only.policy.json
+      ├─ retail-cap-with-treasury-bypass.policy.json
+      ├─ strict-no-exemptions.policy.json
+      └─ treasury-emergency-freeze.policy.json
 ```
 
 ---
@@ -163,6 +170,14 @@ What this does:
 
 ## Verification commands
 
+### Policy example validation
+
+```bash
+npm run check:examples
+```
+
+This validates the active policy file plus every template in `examples/policies/` so contributors can safely add new postures without breaking the cookbook.
+
 ### Unit tests
 
 ```bash
@@ -197,6 +212,20 @@ npm run check:policy
 ```bash
 npm run check:live
 ```
+
+---
+
+## Policy cookbook
+
+Developers rarely want a single policy file — they want a set of starting postures they can fork quickly.
+
+This repo now includes:
+
+- `docs/POLICY_COOKBOOK.md` for posture selection and adaptation guidance
+- `examples/policies/` for ready-to-copy policy templates
+- `npm run check:examples` to validate the cookbook in CI
+
+That makes the repo more useful as a reusable Forte developer on-ramp instead of just a one-off demo.
 
 ---
 

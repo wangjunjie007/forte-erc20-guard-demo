@@ -86,7 +86,7 @@ deploy_rules_engine() {
 
 deploy_demo() {
   PRIV_KEY="$OWNER_KEY" MAX_TRANSFER_WEI=1000000000000000000000 \
-    forge script script/DeployDemo.s.sol --broadcast --rpc-url "$RPC_URL" --private-key "$OWNER_KEY" -vv >/tmp/forte_demo_deploy.log 2>&1 || {
+    forge script script/DeployDemo.s.sol --broadcast --slow --rpc-url "$RPC_URL" --private-key "$OWNER_KEY" -vv >/tmp/forte_demo_deploy.log 2>&1 || {
       cat /tmp/forte_demo_deploy.log >&2
       exit 1
     }
