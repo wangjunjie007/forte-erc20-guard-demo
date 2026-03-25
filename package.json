@@ -1,6 +1,6 @@
 {
   "name": "forte-erc20-guard-demo",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A practical ERC20 demo showing how to enforce transfer caps, blacklist checks, and lockups with Forte Rules Engine",
   "license": "MIT",
   "repository": {
