@@ -29,6 +29,9 @@ This repo demonstrates a cleaner pattern:
 - move policy decisions into **Forte Rules Engine**
 - keep validation reproducible with **Foundry tests** and **live integration checks**
 
+If you need the NFT / marketplace companion path, see the sibling repo:
+- `forte-erc721-guard-demo`
+
 ---
 
 ## What the demo enforces

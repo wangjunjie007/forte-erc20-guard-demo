@@ -40,25 +40,26 @@ npm run check:policy
 - cleaned shell scripts without machine-specific absolute project paths
 - package scripts for test / rebuild / integration / policy assertion
 
-## Best next move before opening the repo publicly
+## Best next move now that the repo is already public
 
 ### P0
 - record a short terminal demo or GIF showing rebuild + live rule failures
-- optionally add one testnet deployment variant if external reviewers need non-local verification
+- add one testnet deployment variant if external reviewers need non-local verification
+- cross-link the ERC721 companion repo so developers can choose the right token posture faster
 
 ### P1
 - add architecture image exports if you want richer visual presentation than Mermaid
-- add badges once the repository URL is final
+- add a reproducible demo artifact bundle for releases (summary JSON + terminal transcript)
 
 ### P2
-- publish to GitHub
 - post a short technical thread or write-up explaining why policy-based controls beat hardcoded token restrictions
+- package the ERC20 and ERC721 demos as a unified Forte developer starter line
 
-## Important decision gate
+## Current decision gate
 
-The codebase is now in a state that can be published.
+The repo is already public and CI-backed.
 
-The only remaining user-owned decision is:
-- **whether to actually push/upload it to a public GitHub repository**
-
-Until that decision is made, this repo is prepared but not published.
+The remaining high-leverage work is no longer publication itself; it is improving:
+- developer onboarding speed
+- demo reproducibility
+- external credibility via video / testnet / release artifacts
